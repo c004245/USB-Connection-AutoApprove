@@ -4,9 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ArrayAdapter;
+
+import com.acs.smartcard.Reader;
 
 /**
  * 18-12-14 Fri.
@@ -22,6 +26,11 @@ public class MainActivity extends AppCompatActivity {
 
     static final String MY_APP_PACKAGENAME = "com.example.hyunwook.usbautoapprove";
     static final String ACTION_USB_PERMISSION_APP =  "ACTION_USB_PERMISSION_ISSUER";
+
+    static final String TAG = MainActivity.class.getSimpleName();
+
+    static private Reader mReader; //출근 장치
+    static private Reader mReader2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,4 +88,38 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+    //Reader Device OpenTask
+    public static class OpenTask extends AsyncTask<ArrayAdapter<UsbDevice>, Void, Exception> {
+
+        @Override
+        protected Exception doInBackground(ArrayAdapter<UsbDevice>... params) {
+            Exception result = null;
+            Log.d(TAG, "params -> " + params.length);
+            for (ArrayAdapter<UsbDevice> u : params) {
+//                Log.d(TAG, "u value ->" + u.getCount() + "//" + u.getItem(0) + "----" + u.getItem(1));
+                try {
+                    if (u.getCount() == 1) {
+                        Log.d(TAG, "Open Reader 1 only in");
+                        mReader.open(u.getItem(0));
+                    } else {
+                        Log.d(TAG, "Open Reader 2 only out");
+                        mReader.open(u.getItem(0));
+                        mReader2.open(u.getItem(1));
+                    }
+                } catch (Exception e) {
+                    result = e;
+                }
+            }
+
+
+            return result;
+        }
+        @Override
+        protected void onPostExecute(Exception result) {
+
+        }
+    }
+
+
 }
