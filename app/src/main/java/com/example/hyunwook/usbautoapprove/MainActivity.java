@@ -4,9 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ArrayAdapter;
+
+import com.acs.smartcard.Reader;
 
 /**
  * 18-12-14 Fri.
@@ -23,6 +27,11 @@ public class MainActivity extends AppCompatActivity {
     static final String MY_APP_PACKAGENAME = "com.example.hyunwook.usbautoapprove";
     static final String ACTION_USB_PERMISSION_APP =  "ACTION_USB_PERMISSION_ISSUER";
 
+    static final String TAG = MainActivity.class.getSimpleName();
+
+    static private Reader mReader; //출근 장치
+    static private Reader mReader2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
 
         mManager = (UsbManager) getSystemService(Context.USB_SERVICE);
 
+        mReader = new Reader(mManager);
+        mReader2 = new Reader(mManager);
         mReaderAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item);
 
         //Check the USB device connected to the Android device
@@ -79,4 +90,51 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+    //Reader Device OpenTask
+    public static class OpenTask extends AsyncTask<ArrayAdapter<UsbDevice>, Void, Exception> {
+
+        @Override
+        protected Exception doInBackground(ArrayAdapter<UsbDevice>... params) {
+            Exception result = null;
+            for (ArrayAdapter<UsbDevice> u : params) {
+                try {
+                    //Current Connected Device Only 1
+                    if (u.getCount() == 1) {
+                        mReader.open(u.getItem(0));
+                    } else {
+                        mReader.open(u.getItem(0));
+                        mReader2.open(u.getItem(1));
+                    }
+                } catch (Exception e) {
+                    result = e;
+                }
+            }
+
+
+            return result;
+        }
+        @Override
+        protected void onPostExecute(Exception result) {
+
+        }
+    }
+
+    public static class CloseTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            mReader.close();
+            mReader2.close();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+        }
+    }
+
+
+
+
 }
