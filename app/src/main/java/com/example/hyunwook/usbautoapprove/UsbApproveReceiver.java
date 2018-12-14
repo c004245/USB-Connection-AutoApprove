@@ -13,6 +13,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
+import com.example.hyunwook.usbautoapprove.MainActivity.OpenTask;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;

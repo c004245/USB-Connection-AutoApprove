@@ -39,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
 
         mManager = (UsbManager) getSystemService(Context.USB_SERVICE);
 
+        mReader = new Reader(mManager);
+        mReader2 = new Reader(mManager);
         mReaderAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item);
 
         //Check the USB device connected to the Android device
@@ -95,15 +97,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Exception doInBackground(ArrayAdapter<UsbDevice>... params) {
             Exception result = null;
-            Log.d(TAG, "params -> " + params.length);
             for (ArrayAdapter<UsbDevice> u : params) {
-//                Log.d(TAG, "u value ->" + u.getCount() + "//" + u.getItem(0) + "----" + u.getItem(1));
                 try {
+                    //Current Connected Device Only 1
                     if (u.getCount() == 1) {
-                        Log.d(TAG, "Open Reader 1 only in");
                         mReader.open(u.getItem(0));
                     } else {
-                        Log.d(TAG, "Open Reader 2 only out");
                         mReader.open(u.getItem(0));
                         mReader2.open(u.getItem(1));
                     }
@@ -120,6 +119,22 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+
+    public static class CloseTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            mReader.close();
+            mReader2.close();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+        }
+    }
+
+
 
 
 }
