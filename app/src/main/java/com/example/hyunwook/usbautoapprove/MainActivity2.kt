@@ -5,10 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.ArrayAdapter
 import com.acs.smartcard.Reader
+import java.lang.Exception
 
 /**
  * 18-12-18
@@ -79,15 +81,58 @@ class MainActivity2 : AppCompatActivity() {
         intent.putExtra("vendorId", 1839)
 
         when (id) {
-            1 ->
+            1 -> {
                 //Test My USB Card Reader Device Product Id 8761
                 intent.putExtra("productId", 8761)
                 intent.putExtra("deviceClass", 0)
-                        
+                intent.putExtra("deviceSubclass", 0)
+            }
+        }
 
+        sendBroadcast(intent)
+
+    }
+
+    class OpenTask : AsyncTask<ArrayAdapter<UsbDevice>, Void, Exception>() {
+
+        override fun doInBackground(vararg params: ArrayAdapter<UsbDevice>?): Exception? {
+            var result : Exception? = null
+
+            for (u : ArrayAdapter<UsbDevice>? in params) {
+                try {
+                    //Current Connected Device Only 1
+                    if (u?.count == 1) {
+                        mReader.open(u!!.getItem(0))
+                    } else {
+                        mReader.open(u!!.getItem(0))
+                        mReader2.open(u!!.getItem(1))
+                    }
+                } catch (e: Exception) {
+                    result = e
+                }
+            }
+
+            return result
 
         }
 
+        override fun onPostExecute(result: Exception?) {
+
+        }
+    }
+
+    //CloseTask
+    class CloseTask : AsyncTask<Void, Void, Void>() {
+
+        override fun doInBackground(vararg params: Void?): Void? {
+            mReader.close()
+            mReader2.close()
+            return null
+        }
+
+        override fun onPostExecute(result: Void?) {
+            
+        }
     }
     companion object {
         lateinit var mReader : Reader
